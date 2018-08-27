@@ -432,6 +432,10 @@ public final class PlaybackService extends Service
 	 */
 	private ReadaheadThread mReadahead;
 	/**
+	 * Referente to our playlist observer
+	 */
+	private PlaylistObserver mPlaylistObserver;
+	/**
 	 * Reference to precreated BASTP Object
 	 */
 	private BastpUtil mBastpUtil;
@@ -467,6 +471,7 @@ public final class PlaybackService extends Service
 		CoverCache.mCoverLoadMode = settings.getBoolean(PrefKeys.COVERLOADER_ANDROID, PrefDefaults.COVERLOADER_ANDROID) ? CoverCache.mCoverLoadMode | CoverCache.COVER_MODE_ANDROID : CoverCache.mCoverLoadMode & ~(CoverCache.COVER_MODE_ANDROID);
 		CoverCache.mCoverLoadMode = settings.getBoolean(PrefKeys.COVERLOADER_VANILLA, PrefDefaults.COVERLOADER_VANILLA) ? CoverCache.mCoverLoadMode | CoverCache.COVER_MODE_VANILLA : CoverCache.mCoverLoadMode & ~(CoverCache.COVER_MODE_VANILLA);
 		CoverCache.mCoverLoadMode = settings.getBoolean(PrefKeys.COVERLOADER_SHADOW , PrefDefaults.COVERLOADER_SHADOW)  ? CoverCache.mCoverLoadMode | CoverCache.COVER_MODE_SHADOW  : CoverCache.mCoverLoadMode & ~(CoverCache.COVER_MODE_SHADOW);
+		CoverCache.mCoverLoadMode = settings.getBoolean(PrefKeys.COVERLOADER_INLINE , PrefDefaults.COVERLOADER_INLINE)  ? CoverCache.mCoverLoadMode | CoverCache.COVER_MODE_INLINE  : CoverCache.mCoverLoadMode & ~(CoverCache.COVER_MODE_INLINE);
 
 		mHeadsetOnly = settings.getBoolean(PrefKeys.HEADSET_ONLY, PrefDefaults.HEADSET_ONLY);
 		mStockBroadcast = settings.getBoolean(PrefKeys.STOCK_BROADCAST, PrefDefaults.STOCK_BROADCAST);
@@ -501,6 +506,10 @@ public final class PlaybackService extends Service
 
 		mRemoteControlClient = new RemoteControl().getClient(this);
 		mRemoteControlClient.initializeRemote();
+
+		int syncMode = Integer.parseInt(settings.getString(PrefKeys.PLAYLIST_SYNC_MODE, PrefDefaults.PLAYLIST_SYNC_MODE));
+		String syncFolder = settings.getString(PrefKeys.PLAYLIST_SYNC_FOLDER, PrefDefaults.PLAYLIST_SYNC_FOLDER);
+		mPlaylistObserver = new PlaylistObserver(this, syncFolder, syncMode);
 
 		mLooper = thread.getLooper();
 		mHandler = new Handler(mLooper, this);
@@ -616,6 +625,7 @@ public final class PlaybackService extends Service
 		enterSleepState();
 
 		MediaLibrary.unregisterLibraryObserver(mObserver);
+		mPlaylistObserver.unregister();
 
 		if (mMediaPlayer != null) {
 			mMediaPlayer.release();
@@ -933,6 +943,12 @@ public final class PlaybackService extends Service
 			mReadaheadEnabled = settings.getBoolean(PrefKeys.ENABLE_READAHEAD, PrefDefaults.ENABLE_READAHEAD);
 		} else if (PrefKeys.AUTOPLAYLIST_PLAYCOUNTS.equals(key)) {
 			mAutoPlPlaycounts = settings.getInt(PrefKeys.AUTOPLAYLIST_PLAYCOUNTS, PrefDefaults.AUTOPLAYLIST_PLAYCOUNTS);
+		} else if (PrefKeys.PLAYLIST_SYNC_MODE.equals(key) || PrefKeys.PLAYLIST_SYNC_FOLDER.equals(key)) {
+			int syncMode = Integer.parseInt(settings.getString(PrefKeys.PLAYLIST_SYNC_MODE, PrefDefaults.PLAYLIST_SYNC_MODE));
+			String syncFolder = settings.getString(PrefKeys.PLAYLIST_SYNC_FOLDER, PrefDefaults.PLAYLIST_SYNC_FOLDER);
+
+			mPlaylistObserver.unregister();
+			mPlaylistObserver = new PlaylistObserver(this, syncFolder, syncMode);
 		} else if (PrefKeys.SELECTED_THEME.equals(key) || PrefKeys.DISPLAY_MODE.equals(key)) {
 			// Theme changed: trigger a restart of all registered activites
 			ArrayList<TimelineCallback> list = sCallbacks;
@@ -1154,10 +1170,10 @@ public final class PlaybackService extends Service
 		if (mStockBroadcast) {
 			Intent intent = new Intent("com.android.music.playstatechanged");
 			intent.putExtra("playing", (mState & FLAG_PLAYING) != 0);
+			intent.putExtra("track", song.title);
+			intent.putExtra("album", song.album);
+			intent.putExtra("artist", song.artist);
 			if (androidIds[0] != -1) {
-				intent.putExtra("track", song.title);
-				intent.putExtra("album", song.album);
-				intent.putExtra("artist", song.artist);
 				intent.putExtra("songid", androidIds[0]);
 				intent.putExtra("albumid", androidIds[1]);
 			}
@@ -1543,6 +1559,9 @@ public final class PlaybackService extends Service
 	 * Otherwise, calls {@link PlaybackService#setCurrentSong(int)} with arg1.
 	 */
 	private static final int MSG_CALL_GO = 8;
+	/**
+	 * The combination of (current song, current playback state) changed.
+	 */
 	private static final int MSG_BROADCAST_CHANGE = 10;
 	private static final int MSG_SAVE_STATE = 12;
 	private static final int MSG_PROCESS_SONG = 13;
@@ -1551,6 +1570,10 @@ public final class PlaybackService extends Service
 	private static final int MSG_GAPLESS_UPDATE = 16;
 	private static final int MSG_UPDATE_PLAYCOUNTS = 17;
 	private static final int MSG_SHOW_TOAST = 18;
+	/**
+	 * The current song's playback position changed.
+	 */
+	private static final int MSG_BROADCAST_SEEK = 19;
 
 	@Override
 	public boolean handleMessage(Message message)
@@ -1639,6 +1662,9 @@ public final class PlaybackService extends Service
 				Toast.makeText(this, resId, duration).show();
 			}
 			break;
+		case MSG_BROADCAST_SEEK:
+			mRemoteControlClient.updateRemote(mCurrentSong, mState, mForceNotificationVisible);
+			break;
 		default:
 			return false;
 		}
@@ -1697,6 +1723,7 @@ public final class PlaybackService extends Service
 			return;
 		long position = (long)mMediaPlayer.getDuration() * progress / 1000;
 		mMediaPlayer.seekTo((int)position);
+		mHandler.sendEmptyMessage(MSG_BROADCAST_SEEK);
 	}
 
 	@Override
@@ -1928,11 +1955,12 @@ public final class PlaybackService extends Service
 		ArrayList<TimelineCallback> list = sCallbacks;
 		for (int i = list.size(); --i != -1; )
 			list.get(i).onPositionInfoChanged();
+		mRemoteControlClient.updateRemote(mCurrentSong, mState, mForceNotificationVisible);
 	}
 
 	private final LibraryObserver mObserver = new LibraryObserver() {
 		@Override
-		public void onChange(LibraryObserver.Type type, boolean ongoing)
+		public void onChange(LibraryObserver.Type type, long id, boolean ongoing)
 		{
 			MediaUtils.onMediaChange();
 			onMediaChange();

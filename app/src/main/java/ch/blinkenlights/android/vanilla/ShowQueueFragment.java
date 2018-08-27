@@ -21,6 +21,7 @@ import android.annotation.SuppressLint;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -186,8 +187,13 @@ public class ShowQueueFragment extends Fragment
 			public void run() {
 				mListAdapter.setData(service, pos);
 
-				if(scroll)
-					scrollToCurrentSong(pos);
+				if(scroll) {
+					// check that we really need to jump to this song, i.e. it is not visible in list right now
+					int min = mListView.getFirstVisiblePosition();
+					int max = mListView.getLastVisiblePosition();
+					if (pos < min || pos > max) // it's out of visible range, scroll
+						scrollToCurrentSong(pos);
+				}
 			}
 		});
 		mIsPopulated = true;
@@ -227,8 +233,15 @@ public class ShowQueueFragment extends Fragment
 	 * its startup and is ready to be queried.
 	 */
 	public void setSong(long uptime, Song song) {
-		if (!mIsPopulated) {
-			onTimelineChanged();
+		if (PlaybackService.hasInstance()) {
+			boolean scroll = PlaybackService
+				.getSettings(getActivity().getApplicationContext())
+				.getBoolean(PrefKeys.QUEUE_ENABLE_SCROLL_TO_SONG,
+							PrefDefaults.QUEUE_ENABLE_SCROLL_TO_SONG);
+
+			if (!mIsPopulated || scroll) {
+				refreshSongQueueList(scroll);
+			}
 		}
 	}
 

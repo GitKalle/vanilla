@@ -33,6 +33,7 @@ public class PrefDefaults {
 	public static final boolean COVERLOADER_ANDROID = true;
 	public static final boolean COVERLOADER_VANILLA = true;
 	public static final boolean COVERLOADER_SHADOW = true;
+	public static final boolean COVERLOADER_INLINE = true;
 	public static final boolean COVER_ON_LOCKSCREEN = true;
 	public static final boolean DISABLE_LOCKSCREEN = false;
 	public static final String DISPLAY_MODE = "2";
@@ -69,5 +70,8 @@ public class PrefDefaults {
 	public static final int     AUTOPLAYLIST_PLAYCOUNTS = 0;
 	public static final boolean IGNORE_AUDIOFOCUS_LOSS = false;
 	public static final boolean ENABLE_SCROLL_TO_SONG = false;
+	public static final boolean QUEUE_ENABLE_SCROLL_TO_SONG = false;
 	public static final boolean KEEP_SCREEN_ON = false;
+	public static final String  PLAYLIST_SYNC_MODE = "0";
+	public static final String  PLAYLIST_SYNC_FOLDER = "/sdcard/Playlists";
 }

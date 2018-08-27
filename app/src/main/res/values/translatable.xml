@@ -249,6 +249,9 @@ THE SOFTWARE.
 	<string name="enable_scroll_to_song_title">Scroll to track title</string>
 	<string name="enable_scroll_to_song_summary">Scroll to currently playing track/album/artist in library lists</string>
 
+	<string name="queue_enable_scroll_to_song_title">Scroll to track title in queue</string>
+	<string name="queue_enable_scroll_to_song_summary">Scroll to currently playing track in the queue on song change</string>
+
 	<string name="coverloader_android_title">Load artwork from Android</string>
 	<string name="coverloader_android_summary">Query Androids internal media database for album artwork</string>
 
@@ -257,6 +260,9 @@ THE SOFTWARE.
 
 	<string name="coverloader_shadow_title">Load artwork from hidden folder</string>
 	<string name="coverloader_shadow_summary">Try to load artwork from \'/sdcard/Music/.vanilla/ARTIST/ALBUM.jpg\'</string>
+
+	<string name="coverloader_inline_title">Load artwork from file tags</string>
+	<string name="coverloader_inline_summary">Try to load embedded artwork from file tags</string>
 
 	<string name="cover_on_lockscreen_title">Show artwork on lockscreen</string>
 	<string name="cover_on_lockscreen_summary">Display the artwork of the currently playing track on the lockscreen</string>
@@ -330,6 +336,14 @@ THE SOFTWARE.
 	<string name="autoplaylist_playcounts_disabled">Do not create an automatic playlist</string>
 	<string name="autoplaylist_playcounts_name" formatted="false">Top %d</string>
 
+	<string name="playlist_sync_mode_title">Playlist synchronization</string>
+	<string name="playlist_sync_all">Full synchronization</string>
+	<string name="playlist_sync_only_import">Import M3U, never export</string>
+	<string name="playlist_sync_only_export">Write M3U, never import</string>
+	<string name="playlist_sync_disabled">Disabled</string>
+	<string name="playlist_sync_folder_title">Synchronization folder</string>
+	<string name="playlist_sync_folder_summary">Folder to use for playlist synchronization</string>
+
 	<string name="permission_request_summary">Vanilla Music needs read permission to display your music library</string>
 	<string name="reverse_sort">Reverse sort</string>
 
@@ -340,6 +354,7 @@ THE SOFTWARE.
 	<string name="duration">Duration</string>
 	<string name="dump_database">Dump database</string>
 	<string name="dump_database_result">Database dumped to \'%s\'</string>
+	<string name="force_m3u_import">Force M3U reimport</string>
 
 	<string name="media_library">Media library</string>
 	<string name="media_folders_header">Indexed directories</string>

@@ -23,8 +23,8 @@ THE SOFTWARE.
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
 	package="ch.blinkenlights.android.vanilla"
-	android:versionName="1.0.62"
-	android:versionCode="10620"
+	android:versionName="1.0.71"
+	android:versionCode="10710"
 	android:installLocation="auto">
 	<uses-permission android:name="android.permission.WAKE_LOCK" />
 	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
@@ -32,9 +32,10 @@ THE SOFTWARE.
 	<!-- This is needed for isWiredHeadsetOn() to work in some cases. (bug?) -->
 	<uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
 	<application
-		android:resizeableActivity="true"
-		android:icon="@mipmap/icon"
-		android:label="@string/app_name">
+	    android:allowBackup="true"
+	    android:resizeableActivity="true"
+	    android:icon="@mipmap/icon"
+	    android:label="@string/app_name">
 
 		<meta-data
 			android:name="com.mirrorlink.android.rockscout.allow-offline-access"
@@ -177,6 +178,8 @@ THE SOFTWARE.
 			android:name="TabOrderActivity" />
 		<activity
 			android:name="FilebrowserStartActivity" />
+		<activity
+			android:name="PlaylistObserverDirActivity" />
 		<activity
 			android:name="MediaFoldersSelectionActivity" />
 		<activity

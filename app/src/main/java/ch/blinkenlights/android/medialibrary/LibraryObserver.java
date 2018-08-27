@@ -26,9 +26,15 @@ public class LibraryObserver {
 	 * by the receiver
 	 */
 	public enum Type {
-		ANY,         // Any type may have changed
-		SONG,        // Change only affected song entries
-		PLAYLIST,    // Change only affected playlists
+		SONG,     // Change affected song items.
+		PLAYLIST, // Change affected playlists.
+	}
+	/**
+	 * Special hint values
+	 */
+	public class Value {
+		public static final int UNKNOWN = -1;  // The exact id of the changed object is not know, may have affected all items.
+		public static final int OUTDATED = -2; // Everything you know is wrong: Cached data must not be used nor trusted.
 	}
 
 	/**
@@ -42,9 +48,10 @@ public class LibraryObserver {
 	 * to be overriden by the registered observer.
 	 *
 	 * @param type one of LibraryObserver.Type
+	 * @param id hint of which id changed for type, -1 if unspecified.
 	 * @param ongoing whether or not to expect more events soon.
 	 */
-	public void onChange(Type type, boolean ongoing) {
+	public void onChange(Type type, long id, boolean ongoing) {
 		// NOOP, should be overriden.
 	}
 }

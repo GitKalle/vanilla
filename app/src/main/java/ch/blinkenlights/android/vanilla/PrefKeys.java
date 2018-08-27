@@ -34,6 +34,7 @@ public class PrefKeys {
 	public static final String COVERLOADER_ANDROID = "coverloader_android";
 	public static final String COVERLOADER_VANILLA = "coverloader_vanilla";
 	public static final String COVERLOADER_SHADOW = "coverloader_shadow";
+	public static final String COVERLOADER_INLINE = "coverloader_inline";
 	public static final String COVER_ON_LOCKSCREEN = "cover_on_lockscreen";
 	public static final String DISABLE_LOCKSCREEN = "disable_lockscreen";
 	public static final String DISPLAY_MODE = "display_mode";
@@ -70,5 +71,8 @@ public class PrefKeys {
 	public static final String AUTOPLAYLIST_PLAYCOUNTS = "playcounts_autoplaylist";
 	public static final String IGNORE_AUDIOFOCUS_LOSS = "ignore_audiofocus_loss";
 	public static final String ENABLE_SCROLL_TO_SONG = "enable_scroll_to_song";
+	public static final String QUEUE_ENABLE_SCROLL_TO_SONG = "queue_enable_scroll_to_song";
 	public static final String KEEP_SCREEN_ON = "keep_screen_on";
+	public static final String PLAYLIST_SYNC_MODE = "playlist_sync_mode";
+	public static final String PLAYLIST_SYNC_FOLDER = "playlist_sync_folder";
 }
