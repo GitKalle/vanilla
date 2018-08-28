@@ -1,3 +1,5 @@
+> Note: This is a fork of [Vanilla Music](https://github.com/vanilla-music/vanilla) with support for Android Auto, see branch "androidAuto".
+
 Vanilla Music
 =====================
 
