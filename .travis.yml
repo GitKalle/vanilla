@@ -18,7 +18,7 @@ android:
     - build-tools-27.0.3
 
     # The SDK version used
-    - android-27
+    - android-28
 
 before_cache:
   - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock

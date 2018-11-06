@@ -204,6 +204,17 @@ public class Song implements Comparable<Song> {
 	}
 
 	/**
+	 * @return track and disc number of this song within its album
+	 */
+	public String getTrackAndDiscNumber() {
+		String result = Integer.toString(trackNumber);
+		if (discNumber > 0) {
+			result += String.format(" (%d💿)", discNumber);
+		}
+		return result;
+	}
+
+	/**
 	 * Query the large album art for this song.
 	 *
 	 * @param context A context to use.
@@ -237,7 +248,7 @@ public class Song implements Comparable<Song> {
 		if (sCoverCache == null)
 			sCoverCache = new CoverCache(context.getApplicationContext());
 
-		Bitmap cover = sCoverCache.getCoverFromSong(this, size);
+		Bitmap cover = sCoverCache.getCoverFromSong(context, this, size);
 
 		if (cover == null)
 			flags |= FLAG_NO_COVER;

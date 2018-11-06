@@ -23,14 +23,16 @@ THE SOFTWARE.
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
 	package="ch.blinkenlights.android.vanilla"
-	android:versionName="1.0.71"
-	android:versionCode="10710"
+	android:versionName="1.0.73"
+	android:versionCode="10730"
 	android:installLocation="auto">
 	<uses-permission android:name="android.permission.WAKE_LOCK" />
 	<uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
 	<uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 	<!-- This is needed for isWiredHeadsetOn() to work in some cases. (bug?) -->
 	<uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+	<!-- Playlist shortcuts -->
+	<uses-permission android:name="com.android.launcher.permission.INSTALL_SHORTCUT" />
 	<application
 	    android:allowBackup="true"
 	    android:resizeableActivity="true"
@@ -188,7 +190,11 @@ THE SOFTWARE.
 
 		<activity
 			android:name="ShortcutPseudoActivity"
-			android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+			android:theme="@android:style/Theme.Translucent.NoTitleBar">
+			<intent-filter>
+				<action android:name="android.intent.action.MAIN"/>
+			</intent-filter>
+		</activity>
 
 		<activity android:name="AudioPickerActivity" android:theme="@style/PopupDialog"
 			android:excludeFromRecents="true" android:exported="true" >

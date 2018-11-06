@@ -168,6 +168,10 @@ public final class PlaybackService extends Service
 	 */
 	public static final String ACTION_RANDOM_MIX_AUTOPLAY = "ch.blinkenlights.android.vanilla.action.RANDOM_MIX_AUTOPLAY";
 	/**
+	 * Flushes the queue and plays everything of the passed type/id combination.
+	 */
+	public static final String ACTION_FROM_TYPE_ID_AUTOPLAY = "ch.blinkenlights.android.vanilla.action.FROM_TYPE_ID_AUTOPLAY";
+	/**
 	 * Change the shuffle mode.
 	 */
 	public static final String ACTION_CYCLE_SHUFFLE = "ch.blinkenlights.android.vanilla.CYCLE_SHUFFLE";
@@ -600,6 +604,13 @@ public final class PlaybackService extends Service
 				// We therefore send a GO message to the same queue, so it will get handled as
 				// soon as the queue is ready.
 				mHandler.sendEmptyMessage(MSG_CALL_GO);
+			} else if (ACTION_FROM_TYPE_ID_AUTOPLAY.equals(action)) {
+				int type = intent.getIntExtra(LibraryAdapter.DATA_TYPE, MediaUtils.TYPE_INVALID);
+				long id = intent.getLongExtra(LibraryAdapter.DATA_ID, LibraryAdapter.INVALID_ID);
+				QueryTask query = MediaUtils.buildQuery(type, id, Song.FILLED_PROJECTION, null);
+				// Flush the queue and start playing:
+				query.mode = SongTimeline.MODE_PLAY;
+				addSongs(query);
 			} else if (ACTION_CLOSE_NOTIFICATION.equals(action)) {
 				mForceNotificationVisible = false;
 				pause();
@@ -624,6 +635,10 @@ public final class PlaybackService extends Service
 		// defer wakelock and close audioFX
 		enterSleepState();
 
+		// stop getting preference changes.
+		getSettings(this).unregisterOnSharedPreferenceChangeListener(this);
+
+		// shutdown all observers.
 		MediaLibrary.unregisterLibraryObserver(mObserver);
 		mPlaylistObserver.unregister();
 
@@ -770,7 +785,7 @@ public final class PlaybackService extends Service
 	 * Closes any open AudioFX session and releases
 	 * our wakelock if held
 	 */
-	private void enterSleepState()
+	private synchronized void enterSleepState()
 	{
 		if (mMediaPlayer != null) {
 			if (mMediaPlayerAudioFxActive) {
