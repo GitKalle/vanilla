@@ -622,17 +622,18 @@ public class LibraryActivity
 	private static final int CTX_MENU_PLUGINS = 11;
 	private static final int CTX_MENU_SHOW_DETAILS = 12;
 	private static final int CTX_MENU_ADD_TO_HOMESCREEN = 13;
+	private static final int CTX_MENU_ADD_TO_PLAYLIST = 14;
 
 	/**
 	 * Creates a context menu for an adapter row.
 	 *
-	 * @param menu The menu to create.
 	 * @param rowData Data for the adapter row.
+	 * @param view the view which was clicked.
+	 * @param x x-coords of event
+	 * @param y y-coords of event
 	 */
-	public boolean onCreateFancyMenu(Intent rowData) {
+	public boolean onCreateFancyMenu(Intent rowData, View view, float x, float y) {
 		FancyMenu fm = new FancyMenu(this, this);
-		fm.show(getFragmentManager(), "LibraryActivityContext");
-
 		// Add to playlist is always available.
 		fm.addSpacer(20);
 		fm.add(CTX_MENU_ADD_TO_PLAYLIST, 20, R.drawable.menu_add_to_playlist, R.string.add_to_playlist).setIntent(rowData);
@@ -660,7 +661,7 @@ public class LibraryActivity
 			fm.add(CTX_MENU_ENQUEUE, 1, R.drawable.menu_enqueue, R.string.enqueue).setIntent(rowData);
 
 			if (type == MediaUtils.TYPE_PLAYLIST) {
-				fm.add(CTX_MENU_RENAME_PLAYLIST, 0, R.drawable.folder, R.string.rename).setIntent(rowData);
+				fm.add(CTX_MENU_RENAME_PLAYLIST, 0, R.drawable.menu_edit, R.string.rename).setIntent(rowData);
 			} else if (rowData.getBooleanExtra(LibraryAdapter.DATA_EXPANDABLE, false)) {
 				fm.add(CTX_MENU_EXPAND, 2, R.drawable.menu_expand, R.string.expand).setIntent(rowData);
 			}
@@ -681,6 +682,7 @@ public class LibraryActivity
 			fm.addSpacer(90);
 			fm.add(CTX_MENU_DELETE, 90, R.drawable.menu_delete, R.string.delete).setIntent(rowData);
 		}
+		fm.show(view, x, y);
 		return true;
 	}
 

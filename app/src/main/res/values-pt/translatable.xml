@@ -44,6 +44,10 @@
   <string name="rename">Mudar nome</string>
   <string name="save_as_playlist">Guardar como lista de reprodução...</string>
   <string name="add_to_playlist">Adicionar à lista de reprodução...</string>
+  <string name="add_to_homescreen">Adicionar ao ecrã inicial...</string>
+  <string name="add_to">Adicionar a...</string>
+  <string name="playlist">Lista de reprodução</string>
+  <string name="homescreen">Ecrã inicial</string>
   <string name="add_to_favorites">Adicionar aos favoritos</string>
   <string name="remove_from_favorites">Remover dos favoritos</string>
   <string name="playlist_favorites">Favoritos</string>
@@ -264,6 +268,12 @@
   <string name="preferences_action_enqueue_current_album">Colocar álbum na fila</string>
   <string name="preferences_action_enqueue_current_artist">Colocar artista na fila</string>
   <string name="preferences_action_enqueue_current_genre">Colocar género na fila</string>
+  <string name="jump_to_time">Ir para duração</string>
+  <string name="time_separator">:</string>
+  <string name="hour_hint">HH</string>
+  <string name="minute_hint">MM</string>
+  <string name="second_hint">SS</string>
+  <string name="error_invalid_position">Posição inválida</string>
   <string name="filebrowser_start">Pasta inicial do explorador</string>
   <string name="customize_filebrowser_start">O explorador de ficheiros abre esta pasta</string>
   <string name="select">Selecionar</string>

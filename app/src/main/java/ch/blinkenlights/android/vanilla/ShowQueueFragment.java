@@ -17,6 +17,10 @@
 
 package ch.blinkenlights.android.vanilla;
 
+import ch.blinkenlights.android.vanilla.ui.FancyMenu;
+import ch.blinkenlights.android.vanilla.ui.FancyMenuItem;
+import ch.blinkenlights.android.vanilla.ext.CoordClickListener;
+
 import android.annotation.SuppressLint;
 import android.app.Fragment;
 import android.content.Context;
@@ -34,10 +38,11 @@ import com.mobeta.android.dslv.DragSortListView;
 
 public class ShowQueueFragment extends Fragment
 	implements TimelineCallback,
-	           AdapterView.OnItemClickListener,
-	           DragSortListView.DropListener,
-	           DragSortListView.RemoveListener,
-	           MenuItem.OnMenuItemClickListener
+			   AdapterView.OnItemClickListener,
+			   CoordClickListener.Callback,
+			   DragSortListView.DropListener,
+			   DragSortListView.RemoveListener,
+			   FancyMenu.Callback
 	{
 
 	private DragSortListView mListView;
@@ -51,13 +56,15 @@ public class ShowQueueFragment extends Fragment
 		View view = inflater.inflate(R.layout.showqueue_listview, container, false);
 		Context context = getActivity();
 
-		mListView    = (DragSortListView) view.findViewById(R.id.list);
 		mListAdapter = new ShowQueueAdapter(context, R.layout.draggable_row);
+		mListView = (DragSortListView) view.findViewById(R.id.list);
 		mListView.setAdapter(mListAdapter);
 		mListView.setDropListener(this);
 		mListView.setRemoveListener(this);
 		mListView.setOnItemClickListener(this);
-		mListView.setOnCreateContextMenuListener(this);
+
+		CoordClickListener ccl = new CoordClickListener(this);
+		ccl.registerForOnItemLongClickListener(mListView);
 
 		PlaybackService.addTimelineCallback(this);
 		return view;
@@ -83,42 +90,51 @@ public class ShowQueueFragment extends Fragment
 	}
 
 
-	private final static int CTX_MENU_PLAY           = 100;
-	private final static int CTX_MENU_ENQUEUE_ALBUM  = 101;
-	private final static int CTX_MENU_ENQUEUE_ARTIST = 102;
-	private final static int CTX_MENU_ENQUEUE_GENRE  = 103;
-	private final static int CTX_MENU_REMOVE         = 104;
-	private final static int CTX_MENU_SHOW_DETAILS   = 105;
+	private final static int CTX_MENU_PLAY            = 100;
+	private final static int CTX_MENU_ENQUEUE_ALBUM   = 101;
+	private final static int CTX_MENU_ENQUEUE_ARTIST  = 102;
+	private final static int CTX_MENU_ENQUEUE_GENRE   = 103;
+	private final static int CTX_MENU_REMOVE          = 104;
+	private final static int CTX_MENU_SHOW_DETAILS    = 105;
+	private final static int CTX_MENU_ADD_TO_PLAYLIST = 106;
 
 	/**
-	 * Called by Android on long press. Builds the long press context menu.
+	 * Called on long-click on a adapeter row
 	 */
 	@Override
-	public void onCreateContextMenu(ContextMenu menu, View listView, ContextMenu.ContextMenuInfo absInfo) {
-		AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)absInfo;
-		Song song = playbackService().getSongByQueuePosition(info.position);
+	public boolean onItemLongClickWithCoords(AdapterView<?> parent, View view, int pos, long id, float x, float y) {
+		Song song = playbackService().getSongByQueuePosition(pos);
 
 		Intent intent = new Intent();
 		intent.putExtra("id", song.id);
 		intent.putExtra("type", MediaUtils.TYPE_SONG);
-		intent.putExtra("position", info.position);
-		menu.setHeaderTitle(song.title);
-		menu.add(0, CTX_MENU_PLAY, 0, R.string.play).setIntent(intent).setOnMenuItemClickListener(this);
-		menu.add(0, CTX_MENU_ENQUEUE_ALBUM, 0, R.string.enqueue_current_album).setIntent(intent).setOnMenuItemClickListener(this);
-		menu.add(0, CTX_MENU_ENQUEUE_ARTIST, 0, R.string.enqueue_current_artist).setIntent(intent).setOnMenuItemClickListener(this);
-		menu.add(0, CTX_MENU_ENQUEUE_GENRE, 0, R.string.enqueue_current_genre).setIntent(intent).setOnMenuItemClickListener(this);
-		menu.addSubMenu(0, SlidingPlaybackActivity.CTX_MENU_ADD_TO_PLAYLIST, 0, R.string.add_to_playlist).getItem().setIntent(intent); // handled by fragment parent
-		menu.add(0, CTX_MENU_SHOW_DETAILS, 0, R.string.details).setIntent(intent).setOnMenuItemClickListener(this);
-		menu.add(0, CTX_MENU_REMOVE, 0, R.string.remove).setIntent(intent).setOnMenuItemClickListener(this);
+		intent.putExtra("position", pos);
+
+		FancyMenu fm = new FancyMenu(getActivity(), this);
+		fm.setHeaderTitle(song.title);
+
+		fm.add(CTX_MENU_PLAY, 0, R.drawable.menu_play, R.string.play).setIntent(intent);
+
+		fm.addSpacer(0);
+		fm.add(CTX_MENU_ENQUEUE_ALBUM, 0, R.drawable.menu_enqueue, R.string.enqueue_current_album).setIntent(intent);
+		fm.add(CTX_MENU_ENQUEUE_ARTIST, 0, R.drawable.menu_enqueue, R.string.enqueue_current_artist).setIntent(intent);
+		fm.add(CTX_MENU_ENQUEUE_GENRE, 0, R.drawable.menu_enqueue, R.string.enqueue_current_genre).setIntent(intent);
+		fm.add(CTX_MENU_ADD_TO_PLAYLIST, 0, R.drawable.menu_add_to_playlist, R.string.add_to_playlist).setIntent(intent);
+
+		fm.addSpacer(0);
+		fm.add(CTX_MENU_SHOW_DETAILS, 0, R.drawable.menu_details, R.string.details).setIntent(intent);
+		fm.add(CTX_MENU_REMOVE, 90, R.drawable.menu_remove, R.string.remove).setIntent(intent);
+		fm.show(view, x, y);
+		return true;
 	}
 
 	/**
-	 * Called by Android after the User selected a MenuItem.
+	 * Callback for FancyMenu clicks.
 	 *
 	 * @param item The selected menu item.
 	 */
 	@Override
-	public boolean onMenuItemClick(MenuItem item) {
+	public boolean onFancyItemSelected(FancyMenuItem item) {
 		Intent intent = item.getIntent();
 		int pos = intent.getIntExtra("position", -1);
 
@@ -142,6 +158,11 @@ public class ShowQueueFragment extends Fragment
 				break;
 			case CTX_MENU_REMOVE:
 				remove(pos);
+				break;
+		    case CTX_MENU_ADD_TO_PLAYLIST:
+				PlaylistDialog.Callback callback = ((PlaylistDialog.Callback)getActivity());
+				PlaylistDialog dialog = PlaylistDialog.newInstance(callback, intent, null);
+				dialog.show(getFragmentManager(), "PlaylistDialog");
 				break;
 			default:
 				throw new IllegalArgumentException("Unhandled menu id received!");
